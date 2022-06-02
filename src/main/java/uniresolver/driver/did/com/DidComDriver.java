@@ -1,4 +1,4 @@
-package uniresolver.driver.did.sov;
+package uniresolver.driver.did.com;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -27,31 +27,30 @@ import foundation.identity.did.VerificationMethod;
 import foundation.identity.did.parser.ParserException;
 import uniresolver.ResolutionException;
 import uniresolver.driver.Driver;
-import uniresolver.driver.did.sov.beans.DidDocument;
-import uniresolver.driver.did.sov.beans.Identity;
-import uniresolver.driver.did.sov.beans.IdentityData;
+import uniresolver.driver.did.com.beans.DidDocument;
+import uniresolver.driver.did.com.beans.Identity;
+import uniresolver.driver.did.com.beans.IdentityData;
 import uniresolver.result.ResolveDataModelResult;
 
-public class DidSovDriver implements Driver {
+public class DidComDriver implements Driver {
 
 	public static void main(String[] args) throws ResolutionException, IllegalArgumentException, ParserException {
-		DidSovDriver driver = new DidSovDriver();
-		DID did1 = DID.fromString("did:com:109l7hvxq4kk0mtarfcl3gy3cdxuypdmt6j50ln");
-		ResolveDataModelResult rdm1 = driver.resolve(did1, Map.of());
+		DID did = DID.fromString("did:com:109l7hvxq4kk0mtarfcl3gy3cdxuypdmt6j50ln");
+		ResolveDataModelResult rdm1 = new DidComDriver().resolve(did, Map.of());
 		System.out.println(rdm1);
 	}
 
-	private final static Logger LOGGER = LoggerFactory.getLogger(DidSovDriver.class);
+	private final static Logger LOGGER = LoggerFactory.getLogger(DidComDriver.class);
 	public final static Pattern DID_COM_PATTERN = Pattern.compile("^did:com:([0-9a-hj-np-z]{38,39})$"); // TODO: verify
 	private final static Gson GSON = new Gson();
 
 	private final Map<String, Object> properties;
 
-	public DidSovDriver(Map<String, Object> properties) {
+	public DidComDriver(Map<String, Object> properties) {
 		this.properties = properties;
 	}
 
-	public DidSovDriver() {
+	public DidComDriver() {
 		this(getPropertiesFromEnvironment());
 	}
 

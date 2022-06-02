@@ -1,4 +1,4 @@
-package uniresolver.driver.did.sov.beans;
+package uniresolver.driver.did.com.beans;
 
 public class Identity {
 	public IdentityData identity;
