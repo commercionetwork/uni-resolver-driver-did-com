@@ -4,7 +4,7 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 	id="WebApp_ID" version="2.5" metadata-complete="true">
 
-	<display-name>uni-resolver-driver-did-sov</display-name>
+	<display-name>uni-resolver-driver-did-com</display-name>
 
 	<!-- SERVLET -->
 
@@ -14,7 +14,7 @@
 		<servlet-class>uniresolver.driver.servlet.InitServlet</servlet-class>
 		<init-param>
 			<param-name>Driver</param-name>
-			<param-value>uniresolver.driver.did.sov.DidSovDriver</param-value>
+			<param-value>uniresolver.driver.did.com.DidComDriver</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>

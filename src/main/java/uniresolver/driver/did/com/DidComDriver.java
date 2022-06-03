@@ -33,6 +33,25 @@ import uniresolver.driver.did.com.beans.IdentityData;
 import uniresolver.result.ResolveDataModelResult;
 
 public class DidComDriver implements Driver {
+	public final static Pattern DID_COM_PATTERN = Pattern.compile("^did:com:([0-9a-hj-np-z]{38,39})$"); // TODO: verify
+
+	/**
+	 * The key used in the properties provided to this application, in order to specify the network to connect to.
+	 */
+	public final static String NETWORK_KEY_IN_PROPERTIES = "uniresolver_driver_did_com_network";
+
+	private final static Gson GSON = new Gson();
+	private final static Logger LOGGER = LoggerFactory.getLogger(DidComDriver.class);
+
+	/**
+	 * The properties passed to this driver.
+	 */
+	private final Map<String, Object> properties;
+
+	/**
+	 * The network to connect to.
+	 */
+	private final String network;
 
 	public static void main(String[] args) throws ResolutionException, IllegalArgumentException, ParserException {
 		DID did = DID.fromString("did:com:109l7hvxq4kk0mtarfcl3gy3cdxuypdmt6j50ln");
@@ -40,59 +59,36 @@ public class DidComDriver implements Driver {
 		System.out.println(rdm1);
 	}
 
-	private final static Logger LOGGER = LoggerFactory.getLogger(DidComDriver.class);
-	public final static Pattern DID_COM_PATTERN = Pattern.compile("^did:com:([0-9a-hj-np-z]{38,39})$"); // TODO: verify
-	private final static Gson GSON = new Gson();
-
-	private final Map<String, Object> properties;
-
+	/**
+	 * Builds a universal resolver driver for the Commercio network.
+	 * 
+	 * @param properties the properties passed to the driver.
+	 */
 	public DidComDriver(Map<String, Object> properties) {
 		this.properties = properties;
+		this.network = selectedNetwork();
 	}
 
+	/**
+	 * Builds a universal resolver driver for the Commercio network.
+	 * Extracts the properties from the environment.
+	 */
 	public DidComDriver() {
 		this(getPropertiesFromEnvironment());
 	}
 
-	private static Map<String, Object> getPropertiesFromEnvironment() {
-		if (LOGGER.isDebugEnabled()) LOGGER.debug("Loading from environment: " + System.getenv());
-
-		Map<String, Object> properties = new HashMap<>();
-
-		try {
-			String env_libIndyPath = System.getenv("uniresolver_driver_did_sov_libIndyPath");
-			String env_poolConfigs = System.getenv("uniresolver_driver_did_sov_poolConfigs");
-			String env_poolVersions = System.getenv("uniresolver_driver_did_sov_poolVersions");
-			String env_walletNames = System.getenv("uniresolver_driver_did_sov_walletNames");
-			String env_submitterDidSeeds = System.getenv("uniresolver_driver_did_sov_submitterDidSeeds");
-			String env_genesisTimestamps = System.getenv("uniresolver_driver_did_sov_genesisTimestamps");
-
-			if (env_libIndyPath != null) properties.put("libIndyPath", env_libIndyPath);
-			if (env_poolConfigs != null) properties.put("poolConfigs", env_poolConfigs);
-			if (env_poolVersions != null) properties.put("poolVersions", env_poolVersions);
-			if (env_walletNames != null) properties.put("walletNames", env_walletNames);
-			if (env_submitterDidSeeds != null) properties.put("submitterDidSeeds", env_submitterDidSeeds);
-			if (env_genesisTimestamps != null) properties.put("genesisTimestamps", env_genesisTimestamps);
-		}
-		catch (Exception e) {
-			throw new IllegalArgumentException(e.getMessage(), e);
-		}
-
-		return properties;
-	}
-
 	@Override
 	public ResolveDataModelResult resolve(DID did, Map<String, Object> resolveOptions) throws ResolutionException {
-		System.out.println("Trying to resolve " + did);
+		logAsDebug("Trying to resolve " + did);
 
 		try {
 			Matcher matcher = DID_COM_PATTERN.matcher(did.getDidString());
 			if (!matcher.matches()) {
-				LOGGER.debug("The DID did not match its expected format");
+				logAsDebug("The DID doesn't match its expected format");
 				return null;
 			}
 
-			String request = "https://lcd-devnet.commercio.network/commercionetwork/did/" + did.getDidString() + "/identities";
+			String request = network + "/commercionetwork/did/" + did.getDidString() + "/identities";
 			String response = sendGetRequest(request);
 			IdentityData identity = GSON.fromJson(response, Identity.class).identity;
 			DidDocument responseDidDocument = identity.didDocument;
@@ -112,6 +108,7 @@ public class DidComDriver implements Driver {
 					.services(intoServices(responseDidDocument.service))
 					.build();
 
+			logAsDebug("Resolved " + did);
 			return ResolveDataModelResult.build(null, didDocument, identity.metadata);
 		}
 		catch (Exception e) {
@@ -119,24 +116,70 @@ public class DidComDriver implements Driver {
 		}
 	}
 
-	private static List<VerificationMethod> intoVerificationMethods(List<Object> list) {
+	@Override
+	public Map<String, Object> properties() {
+		return properties;
+	}
+
+	/**
+	 * Infers the Commercio network endpoint to contact. This is specified in the properties
+	 * passed to this driver, and defaults to https://lcd-devnet.commercio.network.
+	 * 
+	 * @return the endpoint
+	 */
+	private String selectedNetwork() {
+		Object network = properties.get(NETWORK_KEY_IN_PROPERTIES);
+		if (network instanceof String)
+			return (String) network;
+		else
+			return "https://lcd-devnet.commercio.network";
+	}
+
+	private static Map<String, Object> getPropertiesFromEnvironment() {
+		logAsDebug("Loading from environment: " + System.getenv());
+	
+		Map<String, Object> properties = new HashMap<>();
+	
+		try {
+			String network = System.getenv(NETWORK_KEY_IN_PROPERTIES);
+			if (network != null)
+				properties.put(NETWORK_KEY_IN_PROPERTIES, network);
+		}
+		catch (Exception e) {
+			throw new IllegalArgumentException(e.getMessage(), e);
+		}
+	
+		return properties;
+	}
+
+	private static void logAsDebug(String message) {
+		if (LOGGER.isDebugEnabled())
+			LOGGER.debug(message);
+	}
+
+	private static List<VerificationMethod> intoVerificationMethods(List<Map<String,Object>> list) {
 		return intoBeans(list, VerificationMethod::fromMap);
 	}
 
-	private static List<Service> intoServices(List<Object> list) {
+	private static List<Service> intoServices(List<Map<String,Object>> list) {
 		return intoBeans(list, Service::fromMap);
 	}
 
-	@SuppressWarnings("unchecked")
-	private static <T> List<T> intoBeans(List<Object> list, Function<Map<String, Object>, T> mapper) {
+	private static <T> List<T> intoBeans(List<Map<String,Object>> list, Function<Map<String, Object>, T> mapper) {
 		return list.stream()
-			.map(object -> (Map<String, Object>) object)
 			.map(mapper)
 			.collect(Collectors.toList());
 	}
 
-	private String sendGetRequest(String request) throws IOException {
-		System.out.println("Sending request " + request);
+	/**
+	 * Sends a GET request to the Commercio network.
+	 * 
+	 * @param request the request
+	 * @return the response
+	 * @throws IOException if the request failed
+	 */
+	private static String sendGetRequest(String request) throws IOException {
+		logAsDebug("Sending request " + request);
 
 		URL url = new URL(request);
 		HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -166,10 +209,5 @@ public class DidComDriver implements Driver {
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
 			return br.lines().collect(Collectors.joining());
 		}
-	}
-
-	@Override
-	public Map<String, Object> properties() {
-		return properties;
 	}
 }
