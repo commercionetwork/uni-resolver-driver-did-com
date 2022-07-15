@@ -24,6 +24,15 @@ docker run -p 8080:8080 universalresolver/driver-did-com
 curl -X GET http://localhost:8080/1.0/identifiers/did:com:10wkpeq0y5we9z7gygxvhydw53zareyg9d7tcd3
 ```
 
+### Network specification (Docker)
+
+By default, the docker script connects to the development network of Commercio.
+You can specify an alternative network as follows:
+
+```
+docker run -p 8080:8080 -e NETWORK=url universalresolver/driver-did-com
+```
+
 ## Build (native Java)
 
 Maven build:

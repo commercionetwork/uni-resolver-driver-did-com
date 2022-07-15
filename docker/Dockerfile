@@ -19,11 +19,14 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     apt-get -y update && \
     apt-get install -y --no-install-recommends software-properties-common gnupg
 
+COPY docker/init.sh init.sh
+RUN chmod 755 init.sh
+
 USER jetty
 
 # variables
 
-ENV uniresolver_driver_did_com_network="https://lcd-devnet.commercio.network"
+# ENV uniresolver_driver_did_com_network="https://lcd-devnet.commercio.network"
 
 # copy from build stage
 
@@ -32,4 +35,4 @@ COPY --from=build --chown=jetty /opt/driver-did-com/target/*.war /var/lib/jetty/
 # done
 
 EXPOSE 8080
-CMD java -Djetty.http.port=8080 -jar /usr/local/jetty/start.jar
+CMD ./init.sh
