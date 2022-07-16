@@ -19,7 +19,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     apt-get -y update && \
     apt-get install -y --no-install-recommends software-properties-common gnupg
 
-COPY docker/init.sh init.sh
+COPY init.sh init.sh
 RUN chmod 755 init.sh
 
 USER jetty
