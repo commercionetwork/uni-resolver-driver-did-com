@@ -19,7 +19,7 @@ did:com:109l7hvxq4kk0mtarfcl3gy3cdxuypdmt6j50ln
 ## Build and Run (Docker)
 
 ```
-docker build -f ./docker/Dockerfile . -t commercionetwork/driver-did-com
+docker build -f ./Dockerfile . -t commercionetwork/driver-did-com
 docker run -p 8080:8080 commercionetwork/driver-did-com
 curl -X GET http://localhost:8080/1.0/identifiers/did:com:10wkpeq0y5we9z7gygxvhydw53zareyg9d7tcd3
 ```
