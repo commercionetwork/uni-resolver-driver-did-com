@@ -26,7 +26,7 @@ USER jetty
 
 # variables
 
-# ENV uniresolver_driver_did_com_network="https://lcd-devnet.commercio.network"
+# ENV uniresolver_driver_did_com_network="https://lcd-mainnet.commercio.network"
 
 # copy from build stage
 

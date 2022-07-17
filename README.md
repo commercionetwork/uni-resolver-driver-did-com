@@ -12,8 +12,8 @@ This is a [Universal Resolver](https://github.com/decentralized-identity/univers
 ## Example DIDs
 
 ```
-did:com:10wkpeq0y5we9z7gygxvhydw53zareyg9d7tcd3
-did:com:109l7hvxq4kk0mtarfcl3gy3cdxuypdmt6j50ln
+did:com:1l6zglh8pvcrjtahsvds2qmfpn0hv83vn8f9cf3
+did:com:17rhmdzlv0zjuahw4mvpfhf3u5tuwyjhr4m06dr
 ```
 
 ## Build and Run (Docker)
@@ -21,12 +21,12 @@ did:com:109l7hvxq4kk0mtarfcl3gy3cdxuypdmt6j50ln
 ```
 docker build -f ./Dockerfile . -t commercionetwork/driver-did-com
 docker run -p 8080:8080 commercionetwork/driver-did-com
-curl -X GET http://localhost:8080/1.0/identifiers/did:com:10wkpeq0y5we9z7gygxvhydw53zareyg9d7tcd3
+curl -X GET http://localhost:8080/1.0/identifiers/did:com:1l6zglh8pvcrjtahsvds2qmfpn0hv83vn8f9cf3
 ```
 
 ### Network specification (Docker)
 
-By default, the docker script connects to the development network of Commercio.
+By default, the docker script connects to the main network of Commercio.
 You can specify an alternative network as follows:
 
 ```
@@ -39,3 +39,11 @@ Maven build:
 
     mvn clean install
 
+## Driver Environment Variables
+
+The driver recognizes the following environment variable:
+
+### `uniresolver_driver_did_com_network`
+
+ * Specifies the URL of the Commercio network to contact.
+ * Default value: https://lcd-mainnet.commercio.network

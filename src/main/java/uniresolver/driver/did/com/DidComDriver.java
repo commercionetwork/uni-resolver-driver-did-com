@@ -33,7 +33,8 @@ import uniresolver.driver.did.com.beans.IdentityData;
 import uniresolver.result.ResolveDataModelResult;
 
 public class DidComDriver implements Driver {
-	public final static Pattern DID_COM_PATTERN = Pattern.compile("^did:com:([0-9a-hj-np-z]{38,39})$"); // TODO: verify
+	private final static String BECH32_CHARS = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
+	public final static Pattern DID_COM_PATTERN = Pattern.compile("^did:com:(1[" + BECH32_CHARS + "]{38})$");
 
 	/**
 	 * The key used in the properties provided to this application, in order to specify the network to connect to.
@@ -54,7 +55,7 @@ public class DidComDriver implements Driver {
 	private final String network;
 
 	public static void main(String[] args) throws ResolutionException, IllegalArgumentException, ParserException {
-		DID did = DID.fromString("did:com:109l7hvxq4kk0mtarfcl3gy3cdxuypdmt6j50ln");
+		DID did = DID.fromString("did:com:1l6zglh8pvcrjtahsvds2qmfpn0hv83vn8f9cf3");
 		ResolveDataModelResult rdm1 = new DidComDriver().resolve(did, Map.of());
 		System.out.println(rdm1);
 	}
@@ -123,7 +124,7 @@ public class DidComDriver implements Driver {
 
 	/**
 	 * Infers the Commercio network endpoint to contact. This is specified in the properties
-	 * passed to this driver, and defaults to https://lcd-devnet.commercio.network.
+	 * passed to this driver, and defaults to https://lcd-mainnet.commercio.network.
 	 * 
 	 * @return the endpoint
 	 */
@@ -132,7 +133,7 @@ public class DidComDriver implements Driver {
 		if (network instanceof String)
 			return (String) network;
 		else
-			return "https://lcd-devnet.commercio.network";
+			return "https://lcd-mainnet.commercio.network";
 	}
 
 	private static Map<String, Object> getPropertiesFromEnvironment() {
